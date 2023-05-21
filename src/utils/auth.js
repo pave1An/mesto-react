@@ -5,7 +5,6 @@ class Auth {
   }
 
   _handleFirstResponse(res) {
-    console.log(res)
     if (res.ok) {
       return res.json();
     }

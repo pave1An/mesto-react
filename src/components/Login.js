@@ -10,12 +10,13 @@ function Login({ onLogin }) {
     e.preventDefault();
     onLogin({ email, password });
   }
-  
+
   return (
     <Form
       title='Вход'
       buttonText='Войти'
       onSubmit={handleSubmit}
+      isFormValid={isValid}
     >
       <fieldset className='form-section__fieldset'>
         <input 

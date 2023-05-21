@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import usePopupEscapeOverlayClose from '../utils/usePopupEscapeOverlayClose';
 
 function PopupWithForm({ isOpen, onClose, name, title, buttonText, onSubmit, children, isFormValid }) {
+  const popupRef = useRef(null);
+  usePopupEscapeOverlayClose(popupRef, onClose, isOpen);
+
   return ( 
-    <div className={`popup ${isOpen && 'popup_opened'} popup_type_${name}`}>
+    <div ref={popupRef} className={`popup ${isOpen && 'popup_opened'} popup_type_${name}`}>
       <div className= "popup__container">
         <button type="button" onClick={onClose} className="popup__close-btn" name="form-close" aria-label="Закрыть" />
         <h3 className="popup__title">{title}</h3>

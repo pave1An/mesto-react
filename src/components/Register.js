@@ -2,17 +2,16 @@ import React from 'react';
 import Form from './Form';
 import useFormWithValidation from '../utils/useFormWithValidation';
 
-function Register( { onRegister } ) {
-
+function Register({ onRegister }) {
   const { values, errors, handleChange, isValid } = useFormWithValidation();
-
+  
   function handleSubmit(e) {
     e.preventDefault();
     const { email, password } = values;
     onRegister({ email, password });
   }
 
-   return (
+  return (
     <Form
       title='Регистрация'
       buttonText='Зарегистрироваться'
