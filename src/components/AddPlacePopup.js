@@ -1,25 +1,18 @@
-import { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import PopupWithForm from "./PopupWithForm";
+import useFormWithValidation from "../utils/useFormWithValidation";
 
-function AddPlacePopup({ isOpen, onClose, onAddPlace, isSaving, onValidation, errorText}) {
-  const [placeData, setPlaceData] = useState({ name: '', link: ''});
-  
-  function handleInputChange(e) {
-    const { name, value } = e.target;
-    setPlaceData(prevState => ({...prevState, [name]: value}));
-    onValidation(e);
-  }
-
-  const { name, link } = placeData;
+function AddPlacePopup({ isOpen, onClose, onAddPlace, isSaving }) {
+  const { values, errors, isValid, handleChange, resetForm } = useFormWithValidation();
 
   function handleSubmit(e) {
     e.preventDefault();
-    onAddPlace(placeData);
+    onAddPlace(values);
   }
 
   useEffect(() => {
-    setPlaceData({ name: '', link: ''});
-  }, [isOpen]);
+    resetForm();
+  }, [isOpen, resetForm]);
 
   return (
     <PopupWithForm
@@ -29,36 +22,33 @@ function AddPlacePopup({ isOpen, onClose, onAddPlace, isSaving, onValidation, er
       title='Новое место'
       buttonText={isSaving ? 'Сохранение...' : 'Создать'}
       onSubmit={handleSubmit}
-      isFormValid={
-        Object.values(errorText).every(i => i === '') 
-        && Object.values(placeData).every(i => i !== '') 
-      }
+      isFormValid={isValid}
     >
       <fieldset className="popup__fieldset">
         <input
           id="title-input"
           type="text"
-          className={`popup__input ${errorText.name && 'popup__input_type_error'}`}
+          className={`popup__input ${errors.name && 'popup__input_type_error'}`}
           name="name"
           placeholder="Название"
           minLength="2"
           maxLength="30"
           required="required"
-          value={name}
-          onChange={handleInputChange}
+          value={values.name || ''}
+          onChange={handleChange}
         />
-        <span className="popup__error popup__error_visible">{errorText.name}</span>
+        <span className="popup__error popup__error_visible">{errors.name || ''}</span>
         <input
           id="url-input"
           type="url"
-          className={`popup__input ${errorText.link && 'popup__input_type_error'}`}
+          className={`popup__input ${errors.link && 'popup__input_type_error'}`}
           name="link"
           placeholder="Ссылка на картинку"
           required="required"
-          value={link}
-          onChange={handleInputChange}
+          value={values.link || ''}
+          onChange={handleChange}
         />
-        <span className="popup__error popup__error_visible">{errorText.link}</span>
+        <span className="popup__error popup__error_visible">{errors.link || ''}</span>
       </fieldset>
     </PopupWithForm>
   );
