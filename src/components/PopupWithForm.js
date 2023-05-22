@@ -1,9 +1,11 @@
-import React, { useRef } from 'react';
-import usePopupEscapeOverlayClose from '../utils/usePopupEscapeOverlayClose';
+import React, { useRef, useContext } from 'react';
+import usePopupClose from '../utils/usePopupClose';
+import { AppContext } from "../contexts/AppContext";
 
-function PopupWithForm({ isOpen, onClose, name, title, buttonText, onSubmit, children, isFormValid }) {
+function PopupWithForm({ isOpen, name, title, buttonText, onSubmit, children, isFormValid }) {
+  const { isSaving, onClose } = useContext(AppContext);
   const popupRef = useRef(null);
-  usePopupEscapeOverlayClose(popupRef, onClose, isOpen);
+  usePopupClose(popupRef, onClose, isOpen);
 
   return ( 
     <div ref={popupRef} className={`popup ${isOpen && 'popup_opened'} popup_type_${name}`}>
@@ -18,7 +20,7 @@ function PopupWithForm({ isOpen, onClose, name, title, buttonText, onSubmit, chi
             name="form-submit" 
             disabled={!isFormValid}
           >
-            {buttonText || 'Coхранить'}
+            {isSaving ? 'Сохранение...' : buttonText || 'Coхранить'}
           </button>
         </form>
       </div>

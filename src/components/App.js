@@ -12,6 +12,7 @@ import ProtectedRouteElement from './ProtectedRouteElement';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import { AppContext } from '../contexts/AppContext';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { InfoTooltip } from './InfoTooltip';
 
@@ -57,72 +58,65 @@ function App() {
     setIsDeleteCardPopupOpen(true);
     setDeletionCardId(cardId);
   }
-
+  
   function handleCardLike(card, isLiked) { 
     api.clickLike(card._id, isLiked)
     .then((res) => setCards(cards => cards.map(c => c._id === card._id ? res : c)))
     .catch((err) => console.log(`Ошибка: ${err.status}`));
   }
-
-  function handleCardDelete() {
+  
+  function handleSubmit(request) {
     setIsSaving(true);
-    api.deleteCard(deletionCardId)
-    .then(() => {
-      setCards(cards => cards.filter(с => с._id !== deletionCardId));
-      closeAllPopups();
-    })
-    .catch((err) => console.log(`Ошибка: ${err.status}`))
+    request()
+    .then(closeAllPopups)
+    .catch(console.error)
     .finally(() => setIsSaving(false));
   }
-
+  
+  function handleCardDelete() {
+    function makeRequest() {
+      return (
+        api.deleteCard(deletionCardId)
+        .then(() => setCards(cards => cards.filter(с => с._id !== deletionCardId)))
+      );
+    }
+    handleSubmit(makeRequest);
+  }
+  
   function handleUpdateUser(userData) {
-    setIsSaving(true);
-    api.patchUserInfo(userData)
-    .then(res => {
-      setCurrentUser(res);
-      closeAllPopups();
-    })
-    .catch((err) => console.log(`Ошибка: ${err.status}`))
-    .finally(() => setIsSaving(false));
+    function makeRequest() {
+      return api.patchUserInfo(userData).then(res => setCurrentUser(res));
+    }
+    handleSubmit(makeRequest);
   }
   
   function handleUpdateAvatar(avatar) {
-    setIsSaving(true);
-    api.patchAvatar(avatar)
-    .then((res) => {
-      setCurrentUser(res);
-      closeAllPopups();
-    })
-    .catch((err) => console.log(`Ошибка: ${err.status}`))
-    .finally(() => setIsSaving(false));
+    function makeRequest() {
+      return api.patchAvatar(avatar).then(res => setCurrentUser(res));
+    }
+    handleSubmit(makeRequest);
   }
   
   function handleAddPlaceSubmit(card) {
-    setIsSaving(true);
-    api.postCard(card)
-    .then(newCard => {
-      setCards([newCard, ...cards]);
-      closeAllPopups();
-    })
-    .catch((err) => console.log(`Ошибка: ${err.status}`))
-    .finally(() => setIsSaving(false));
+    function makeRequest() {
+      return api.postCard(card).then(newCard => setCards([newCard, ...cards]));
+    }
+    handleSubmit(makeRequest);
   }
 
   function handleRegister({ email, password }) {
     auth.registration({ email, password })
-    .then((res) => {
-      if(res.data) {
-        setIsRegisterSuccess(true);
-        navigate('/sign-in', {replace: true});
-        setIsInfoTooltipOpen(true);
-      }
+    .then(() => {
+      setIsRegisterSuccess(true);
+      navigate('/sign-in', {replace: true});
     })
     .catch((err) => {
       setIsRegisterSuccess(false);
-      setIsInfoTooltipOpen(true);
-      console.log(`Ошибка: ${err.status}`);
-    });
+      console.log(err);
+    })
+    .finally(() => setIsInfoTooltipOpen(true))
   }
+  
   
   function handleLogin({ email, password }) {
     auth.login({ email, password })
@@ -134,7 +128,7 @@ function App() {
         navigate('/', {replace: true});
       }
     })
-    .catch((err) => console.log(`Ошибка: ${err.status}`));
+    .catch(console.error);
   }
 
   const checkToken = useCallback(() => {
@@ -148,7 +142,7 @@ function App() {
           navigate('/', {replace: true});
         }
       })
-      .catch((err) => console.log(`Ошибка: ${err.status}`));
+      .catch(console.error);
     }
   }, [navigate]);
 
@@ -179,55 +173,37 @@ function App() {
 
   return (
     <div className="page">
-      <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} userEmail={userEmail} onSignout={handleSignout} />
-        
-        <Routes>
-          <Route path='/' element={
-            <ProtectedRouteElement element= {Main}
-              onEditProfile={handleEditProfileClick} 
-              onAddPlace={handleAddPlaceClick}
-              onEditAvatar={handleEditAvatarClick}
-              onCardClick={handleCardClick}
-              onClose={closeAllPopups}
-              onCardLike={handleCardLike}
-              onCardDelete={handleDeleteClick}
-              cards={cards}
-              loggedIn={loggedIn}
-            />}
-          />
-          <Route path='/sign-up' element={<Register onRegister={handleRegister}/>} />
-          <Route path='/sign-in' element={<Login onLogin={handleLogin} />} />
-        </Routes>
+      <AppContext.Provider value={{ isSaving, onClose: closeAllPopups }}>
+        <CurrentUserContext.Provider value={currentUser}>
+          <Header loggedIn={loggedIn} userEmail={userEmail} onSignout={handleSignout} />
+          
+          <Routes>
+            <Route path='/' element={
+              <ProtectedRouteElement 
+                element= {Main}
+                onEditProfile={handleEditProfileClick} 
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                onCardClick={handleCardClick}
+                onCardLike={handleCardLike}
+                onCardDelete={handleDeleteClick}
+                cards={cards}
+                loggedIn={loggedIn}
+              />
+            }/>
+            <Route path='/sign-up' element={<Register onRegister={handleRegister}/>} />
+            <Route path='/sign-in' element={<Login onLogin={handleLogin} />} />
+          </Routes>
 
-        <EditAvatarPopup 
-          isOpen={isEditAvatarPopupOpen}
-          onClose={closeAllPopups}
-          onUpdateAvatar={handleUpdateAvatar}
-          isSaving={isSaving}
-        />
-        <EditProfilePopup 
-          isOpen={isEditProfilePopupOpen}
-          onClose={closeAllPopups}
-          onUpdateUser={handleUpdateUser}
-          isSaving={isSaving}
-        />
-        <AddPlacePopup 
-          isOpen={isAddPlacePopupOpen}
-          onClose={closeAllPopups}
-          onAddPlace={handleAddPlaceSubmit}
-          isSaving={isSaving}
-        />
-        <DeleteCardPopup
-          isOpen={isDeleteCardPopupOpen}
-          onClose={closeAllPopups}
-          onDeleteCard={handleCardDelete}
-          isSaving={isSaving}
-        />
-        <ImagePopup card={selectedCard} closeAllPopups={closeAllPopups} onClose={closeAllPopups} />
-        <InfoTooltip onClose={closeAllPopups} isOpen={isInfoTooltipOpen} isRegisterSuccess={isRegisterSuccess} />
-        {loggedIn && <Footer />}
-      </CurrentUserContext.Provider>
+          <InfoTooltip isOpen={isInfoTooltipOpen} isRegisterSuccess={isRegisterSuccess} />
+          <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onUpdateAvatar={handleUpdateAvatar} />
+          <EditProfilePopup isOpen={isEditProfilePopupOpen} onUpdateUser={handleUpdateUser} />
+          <AddPlacePopup isOpen={isAddPlacePopupOpen} onAddPlace={handleAddPlaceSubmit} />
+          <DeleteCardPopup isOpen={isDeleteCardPopupOpen} onDeleteCard={handleCardDelete} />
+          <ImagePopup card={selectedCard} />
+          {loggedIn && <Footer />}
+        </CurrentUserContext.Provider>
+      </AppContext.Provider>
     </div>
   );
 }

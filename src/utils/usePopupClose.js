@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const usePopupEscapeOverlayClose = (elementRef, handleClose, isOpen) => {
+const usePopupClose = (elementRef, handleClose, isOpen) => {
   useEffect(() => {
     if (!isOpen) return;
     const handleClosePopup = (e) => {
@@ -11,13 +11,13 @@ const usePopupEscapeOverlayClose = (elementRef, handleClose, isOpen) => {
     }
 
     document.addEventListener('keydown', handleClosePopup);
-    document.addEventListener('mousedown', handleClosePopup);
+    document.addEventListener('mouseup', handleClosePopup);
     
     return () => {
       document.removeEventListener('keydown', handleClosePopup);
-      document.removeEventListener('mousedown', handleClosePopup);
+      document.removeEventListener('mouseup', handleClosePopup);
     }
   }, [isOpen, elementRef, handleClose]);
 }
 
-export default  usePopupEscapeOverlayClose;
+export default  usePopupClose;

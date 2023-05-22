@@ -10,9 +10,7 @@ function AddPlacePopup({ isOpen, onClose, onAddPlace, isSaving }) {
     onAddPlace(values);
   }
 
-  useEffect(() => {
-    resetForm();
-  }, [isOpen, resetForm]);
+  useEffect(() => resetForm(), [isOpen, resetForm]);
 
   return (
     <PopupWithForm

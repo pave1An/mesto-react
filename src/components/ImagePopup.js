@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useContext, useRef } from 'react';
+import { AppContext } from '../contexts/AppContext';
+import usePopupClose from '../utils/usePopupClose';
 
-function ImagePopup({ card, onClose }) {
+function ImagePopup({ card }) {
+  const elementRef = useRef(null);
+  const { onClose } = useContext(AppContext);
+  usePopupClose(elementRef, onClose, card.link);
+
   return (
-    <div className={`popup popup_type_image popup_background_dark ${card.link && 'popup_opened'}`}>
+    <div ref={elementRef} className={`popup popup_type_image popup_background_dark ${card.link && 'popup_opened'}`}>
       <div className="popup__image-container">
         <button 
           type="button" 

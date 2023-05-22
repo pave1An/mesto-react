@@ -4,72 +4,69 @@ class Api {
     this._headers = config.headers;
   }
 
-  handleFirstResponse(res) {
+  _handleFirstResponse(res) {
     if (res.ok) {
       return res.json();
     }
     return Promise.reject(`Ошибка: ${res.status}`);
   }
 
+  _request(endpoint, options) {
+    return fetch(`${this._baseUrl + endpoint}`,options).then(this._handleFirstResponse);
+  }
+
   getUserInfo() {
-    return fetch(`${this._baseUrl}/users/me`, {headers: this._headers})
-    .then( res => this.handleFirstResponse(res));
+    return this._request('/users/me', {headers: this._headers});
   }
 
   patchUserInfo(data) {
-    return fetch(`${this._baseUrl}/users/me`, {
+    return this._request('/users/me', {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({
         name: data.name,
         about: data.about
       })
-    })
-    .then( res => this.handleFirstResponse(res));
+    });
   }
 
-  patchAvatar(avatar) {
-    return fetch(`${this._baseUrl}/users/me/avatar `, {
+  patchAvatar({ avatar }) {
+    return this._request('/users/me/avatar', {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({
         avatar: avatar
       })
-    })
-    .then( res => this.handleFirstResponse(res));
+    });
   }
 
   getInitialCards() {
-    return fetch(`${this._baseUrl}/cards`, {headers: this._headers})
-    .then( res => this.handleFirstResponse(res));
+    return this._request('/cards', {headers: this._headers});
   }
 
   postCard(cardData) {
-    return fetch(`${this._baseUrl}/cards`, {
+    return this._request('/cards', {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({
         name: cardData.name,
         link: cardData.link
       })
-    })
-    .then( res => this.handleFirstResponse(res));
+    });
   }
 
   deleteCard(cardId) {
-    return fetch(`${this._baseUrl}/cards/${cardId}`, {
+    return this._request(`/cards/${cardId}`, {
       method: 'DELETE',
       headers: this._headers,
-    })
-    .then( res => this.handleFirstResponse(res));
+    });
   }
-
+  
   clickLike(cardId, isLiked) {
-    return fetch(`${this._baseUrl}/cards/${cardId}/likes`, {
+    return this._request(`/cards/${cardId}/likes`, {
       method: isLiked ? 'DELETE' : 'PUT',
       headers: this._headers,
-    })
-    .then( res => this.handleFirstResponse(res));
+    });
   }
 }
 

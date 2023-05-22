@@ -3,7 +3,6 @@ import Card from './Card';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick, onCardLike, onCardDelete, cards }) {
-   
   const currentUser = React.useContext(CurrentUserContext);
 
   return (
@@ -35,15 +34,15 @@ function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick, onCardLike
 
       <section className="photo-grid">
         <ul className="photo-grid__list">
-          {cards.map((card) => 
-            <Card 
+          {cards.map((card) => (
+           <Card 
               key={card._id} 
               card={card} 
               onCardClick={onCardClick} 
               onCardLike={onCardLike} 
               onCardDelete={onCardDelete}
             />
-          )}
+          ))}
         </ul>
       </section>
     </main>

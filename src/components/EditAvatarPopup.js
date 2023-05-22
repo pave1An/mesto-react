@@ -1,34 +1,28 @@
-import { useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import PopupWithForm from './PopupWithForm';
 import useFormWithValidation from '../utils/useFormWithValidation';
 
-function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar, isSaving }) {
-  const { errors, resetForm, handleChange, isValid } = useFormWithValidation(); 
-  const inputRef = useRef('');
+function EditAvatarPopup({ isOpen, onUpdateAvatar }) {
+  const { values, errors, resetForm, handleChange, isValid } = useFormWithValidation(); 
 
   function handleSubmit(e) {
     e.preventDefault();
-    onUpdateAvatar(inputRef.current.value);
+    onUpdateAvatar(values);
   }
 
-  useEffect(() => {
-    resetForm();
-    inputRef.current.value = '';
-  }, [isOpen, resetForm]);
+  useEffect(() => resetForm(), [isOpen, resetForm]);
 
   return (
     <PopupWithForm 
       isOpen={isOpen} 
-      onClose={onClose} 
       name='avatar-edit'
       title='Обновить аватар'
-      buttonText={isSaving && 'Сохранение...'}
       onSubmit={handleSubmit}
       isFormValid={isValid}
     >
       <fieldset className='popup__fieldset'>
         <input
-          ref={inputRef}
+          value={values.avatar || ''}
           id='avatar-input'
           type='url'
           className={`popup__input ${errors.avatar && 'popup__input_type_error'}`}

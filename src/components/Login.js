@@ -20,6 +20,7 @@ function Login({ onLogin }) {
     >
       <fieldset className='form-section__fieldset'>
         <input 
+          value={values.email || ''}
           onChange={handleChange} 
           name='email' 
           className='form-section__input' 
@@ -29,6 +30,7 @@ function Login({ onLogin }) {
         />
         <span className='form-section__error'>{errors.email}</span>
         <input 
+          value={values.password || ''}
           onChange={handleChange} 
           name='password' 
           className='form-section__input' 
