@@ -6,9 +6,8 @@ function Login({ onLogin }) {
   const { values, errors, handleChange, isValid } = useFormWithValidation();
   
   function handleSubmit(e) {
-    const { email, password } = values;
     e.preventDefault();
-    onLogin({ email, password });
+    onLogin(values);
   }
 
   return (
