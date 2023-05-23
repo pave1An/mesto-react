@@ -11,39 +11,40 @@ class Auth {
     return Promise.reject(`Ошибка: ${res.status}`)
   }
 
+  _request(endpoint, options) {
+    return fetch(`${this._baseUrl + endpoint}`,options).then(this._handleFirstResponse);
+  }
+
   registration({ password, email }) {
-    return fetch(`${this._baseUrl}/signup`, {
+    return this._request(`/signup`, {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({
         'email' : email,
         'password': password
       })
-    })
-    .then(res => this._handleFirstResponse(res))
+    });
   }
 
   login({ password, email }) {
-    return fetch(`${this._baseUrl}/signin`, {
+    return this._request('/signin', {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({
         'email' : email,
         'password': password
       })
-    })
-    .then(res => this._handleFirstResponse(res))
+    });
   }
 
   checkToken(jwt) {
-    return fetch(`${this._baseUrl}/users/me`, {
+    return this._request('/users/me', {
       method: 'GET',
       headers: {
         'Content-Type': 'aplication/json',
         'Authorization': `Bearer ${jwt}`
       }
-    })
-    .then(res => this._handleFirstResponse(res))
+    });
   }
 }
 
